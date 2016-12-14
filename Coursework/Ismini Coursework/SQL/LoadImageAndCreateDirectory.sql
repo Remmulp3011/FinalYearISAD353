@@ -7,7 +7,7 @@ GRANT READ ON DIRECTORY LANDMARK_IMAGES TO PUBLIC;
 CREATE OR REPLACE PROCEDURE load_image_from_file
 (p_filename IN VARCHAR2) AS
 
- l_image_id INTEGER;
+ l_info_id INTEGER;
  l_image    ORDSYS.ORDImage;
  ctx        RAW (64) := NULL;
 
@@ -24,12 +24,12 @@ BEGIN
      p_filename,
      ORDSYS.ORDImage
        ('FILE',
-        'ISAD353_IMAGES',
+       'LANDMARK_IMAGES',
         p_filename,
         1 -- setProperties, default is 0
        )
     )
-  RETURNING info_id, image INTO l_image_id, l_image;
+  RETURNING info_id, image INTO l_info_id, l_image;
   -- useful INSERT variant
 
   l_image.import(ctx);
@@ -39,7 +39,7 @@ BEGIN
 
   UPDATE LANDMARK_INFORMATION_V2
   SET image = l_image
-  WHERE info_id = l_image_id;
+  WHERE info_id = l_info_id;
 
   COMMIT;
 
@@ -50,4 +50,9 @@ BEGIN
       dbms_output.put_line(sqlerrm);
     END;
 
+END;
+
+BEGIN
+  create_blob_thumbnail(2);
+  create_blob_thumbnail(4);
 END;
